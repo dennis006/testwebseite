@@ -44,23 +44,22 @@ const avatars = [
   },
 ];
 
-const orbitPositions = [
-  { x: 0, y: -95 },
-  { x: 82, y: -18 },
-  { x: 68, y: 82 },
-  { x: -82, y: -12 },
-  { x: -68, y: 88 },
-];
-
 export function AvatarOrbitSection() {
-  const pairs = useMemo(
-    () =>
-      avatars.map((avatar, index) => ({
+  const pairs = useMemo(() => {
+    const orbitRadius = 140;
+
+    return avatars.map((avatar, index) => {
+      const angle = (index / avatars.length) * Math.PI * 2 - Math.PI / 2;
+
+      return {
         avatar,
-        position: orbitPositions[index % orbitPositions.length],
-      })),
-    []
-  );
+        position: {
+          x: Math.cos(angle) * orbitRadius,
+          y: Math.sin(angle) * orbitRadius,
+        },
+      };
+    });
+  }, []);
 
   return (
     <section className="section-padding">
@@ -82,7 +81,7 @@ export function AvatarOrbitSection() {
               {pairs.map(({ avatar, position }, index) => (
                 <motion.div
                   key={avatar.name}
-                  className="absolute flex w-24 -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-2 text-center"
+                  className="absolute flex w-28 -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-2 text-center"
                   style={{ left: `calc(50% + ${position.x}px)`, top: `calc(50% + ${position.y}px)` }}
                   animate={{ y: [0, -8, 0] }}
                   transition={{ duration: 4 + index, repeat: Infinity, ease: "easeInOut" }}
@@ -107,13 +106,13 @@ export function AvatarOrbitSection() {
                 </motion.div>
               ))}
             </motion.div>
-            <div className="glass-panel pointer-events-none absolute -bottom-20 left-1/2 flex w-48 -translate-x-1/2 flex-col items-center gap-2 p-5 text-center">
-              <span className="gradient-text text-xs uppercase tracking-[0.35em]">Orbit Sync</span>
-              <p className="text-xs text-white/80">
-                Pulse liest Mikrosignale, wenn eure Avatare kollidieren – so fühlt sich Matching organisch an.
-              </p>
-            </div>
           </motion.div>
+          <div className="glass-panel mt-10 flex w-56 flex-col items-center gap-2 p-5 text-center">
+            <span className="gradient-text text-xs uppercase tracking-[0.35em]">Orbit Sync</span>
+            <p className="text-xs text-white/80">
+              Pulse liest Mikrosignale, wenn eure Avatare kollidieren – so fühlt sich Matching organisch an.
+            </p>
+          </div>
         </div>
 
         <div className="order-1 space-y-6 lg:order-2">
