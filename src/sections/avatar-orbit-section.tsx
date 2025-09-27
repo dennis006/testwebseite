@@ -45,11 +45,11 @@ const avatars = [
 ];
 
 const orbitPositions = [
-  { x: 0, y: -120 },
-  { x: 105, y: -25 },
-  { x: 85, y: 105 },
-  { x: -105, y: -20 },
-  { x: -85, y: 110 },
+  { x: 0, y: -95 },
+  { x: 82, y: -18 },
+  { x: 68, y: 82 },
+  { x: -82, y: -12 },
+  { x: -68, y: 88 },
 ];
 
 export function AvatarOrbitSection() {
@@ -71,7 +71,7 @@ export function AvatarOrbitSection() {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true, amount: 0.4 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="relative flex h-[420px] w-[420px] items-center justify-center rounded-full border border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-950/60 to-slate-950/90 shadow-[0_0_80px_rgba(14,165,233,0.35)]"
+            className="relative flex h-[420px] w-[420px] items-center justify-center overflow-hidden rounded-full border border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-950/60 to-slate-950/90 shadow-[0_0_80px_rgba(14,165,233,0.35)]"
           >
             <div className="absolute inset-12 rounded-full border border-dashed border-white/10" />
             <motion.div
@@ -82,7 +82,7 @@ export function AvatarOrbitSection() {
               {pairs.map(({ avatar, position }, index) => (
                 <motion.div
                   key={avatar.name}
-                  className="absolute flex w-28 -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-2 text-center"
+                  className="absolute flex w-24 -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-2 text-center"
                   style={{ left: `calc(50% + ${position.x}px)`, top: `calc(50% + ${position.y}px)` }}
                   animate={{ y: [0, -8, 0] }}
                   transition={{ duration: 4 + index, repeat: Infinity, ease: "easeInOut" }}
@@ -107,7 +107,7 @@ export function AvatarOrbitSection() {
                 </motion.div>
               ))}
             </motion.div>
-            <div className="glass-panel absolute bottom-10 left-1/2 flex w-48 -translate-x-1/2 flex-col items-center gap-2 p-5 text-center">
+            <div className="glass-panel pointer-events-none absolute -bottom-20 left-1/2 flex w-48 -translate-x-1/2 flex-col items-center gap-2 p-5 text-center">
               <span className="gradient-text text-xs uppercase tracking-[0.35em]">Orbit Sync</span>
               <p className="text-xs text-white/80">
                 Pulse liest Mikrosignale, wenn eure Avatare kollidieren – so fühlt sich Matching organisch an.
