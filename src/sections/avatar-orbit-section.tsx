@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 const avatars = [
   {
@@ -49,32 +49,115 @@ const avatars = [
   },
 ];
 
+function useResponsiveOrbitConfig() {
+  const [config, setConfig] = useState(() => ({
+    radius: 200,
+    ringThickness: 36,
+    itemSize: 88,
+    innerInset: 12,
+  }));
+
+  useEffect(() => {
+    const queries = [
+      { query: "(min-width: 1280px)", value: { radius: 220, ringThickness: 40, itemSize: 96, innerInset: 14 } },
+      { query: "(min-width: 1024px)", value: { radius: 210, ringThickness: 38, itemSize: 92, innerInset: 13 } },
+      { query: "(min-width: 640px)", value: { radius: 190, ringThickness: 34, itemSize: 84, innerInset: 12 } },
+    ];
+
+    const getConfig = () => {
+      if (typeof window === "undefined") {
+        return;
+      }
+
+      for (const entry of queries) {
+        if (window.matchMedia(entry.query).matches) {
+          setConfig(entry.value);
+          return;
+        }
+      }
+
+      setConfig({ radius: 180, ringThickness: 32, itemSize: 80, innerInset: 11 });
+    };
+
+    getConfig();
+
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const listeners = queries.map((entry) => {
+      const mediaQuery = window.matchMedia(entry.query);
+      const handler = () => getConfig();
+      mediaQuery.addEventListener("change", handler);
+      return { mediaQuery, handler };
+    });
+
+    return () => {
+      listeners.forEach(({ mediaQuery, handler }) => {
+        mediaQuery.removeEventListener("change", handler);
+      });
+    };
+  }, []);
+
+  return config;
+}
+
 export function AvatarOrbitSection() {
-  const pairs = useMemo(() => {
-    const baseRadius = 140;
-    const angleStep = (Math.PI * 2) / avatars.length;
+  const orbitConfig = useResponsiveOrbitConfig();
+
+  const orbitItems = useMemo(() => {
+    const angleStep = 360 / avatars.length;
+    const angleOffsets = [-12, 8, -4, 14, -10];
 
     return avatars.map((avatar, index) => {
-      const angleVariation = Math.sin(index * 1.2) * (angleStep / 3.2);
-      const angle = -Math.PI / 2 + index * angleStep + angleVariation;
-      const radius = baseRadius + Math.cos(index * 1.6) * 32;
+      const baseAngle = -90 + index * angleStep;
+      const angle = baseAngle + (angleOffsets[index] ?? 0);
 
       return {
         avatar,
-        position: {
-          x: Math.cos(angle) * radius,
-          y: Math.sin(angle) * radius,
-        },
+        angle,
       };
     });
   }, []);
 
-  const formatOffset = (value: number) =>
-    value >= 0 ? `calc(50% + ${value}px)` : `calc(50% - ${Math.abs(value)}px)`;
+  const orbitGeometry = useMemo(() => {
+    const outerRadius = orbitConfig.radius + orbitConfig.ringThickness / 2;
+    const size = outerRadius * 2;
+    const center = size / 2;
+    const rItem =
+      orbitConfig.radius -
+      orbitConfig.ringThickness / 2 -
+      orbitConfig.itemSize / 2 -
+      orbitConfig.innerInset;
+
+    const positionedItems = orbitItems.map((item) => {
+      const angleRad = (item.angle * Math.PI) / 180;
+      const x = center + rItem * Math.cos(angleRad);
+      const y = center + rItem * Math.sin(angleRad);
+
+      return {
+        ...item,
+        angleRad,
+        position: { x, y },
+      };
+    });
+
+    return {
+      size,
+      positionedItems,
+    };
+  }, [orbitConfig.innerInset, orbitConfig.itemSize, orbitConfig.radius, orbitConfig.ringThickness, orbitItems]);
+
+  const { size: orbitSize, positionedItems } = orbitGeometry;
+
+  const avatarDiameter = useMemo(
+    () => Math.max(48, Math.round(orbitConfig.itemSize * 0.52)),
+    [orbitConfig.itemSize],
+  );
 
   const signalBridges = useMemo(() => {
-    return pairs.map((current, index) => {
-      const next = pairs[(index + 1) % pairs.length];
+    return positionedItems.map((current, index) => {
+      const next = positionedItems[(index + 1) % positionedItems.length];
 
       const dx = next.position.x - current.position.x;
       const dy = next.position.y - current.position.y;
@@ -92,7 +175,7 @@ export function AvatarOrbitSection() {
         midpoint,
       };
     });
-  }, [pairs]);
+  }, [positionedItems]);
 
   return (
     <section className="section-padding">
@@ -103,69 +186,92 @@ export function AvatarOrbitSection() {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true, amount: 0.4 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="relative flex h-[440px] w-[440px] items-center justify-center overflow-visible rounded-full border border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-950/60 to-slate-950/90 shadow-[0_0_80px_rgba(14,165,233,0.35)]"
+            className="relative flex items-center justify-center rounded-full border border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-950/60 to-slate-950/90 shadow-[0_0_80px_rgba(14,165,233,0.35)]"
+            style={{ width: orbitSize, height: orbitSize }}
           >
-            <div className="absolute inset-12 rounded-full border border-dashed border-white/10" />
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 26, repeat: Infinity, ease: "linear" }}
-              className="absolute inset-6"
-            >
-              {signalBridges.map((signal) => (
-                <motion.div
-                  key={signal.index}
-                  className="absolute left-1/2 top-1/2 h-px origin-center overflow-visible"
-                  style={{
-                    width: signal.length,
-                    transform: `translate(-50%, -50%) rotate(${signal.angle}deg)`,
-                    top: formatOffset(signal.midpoint.y),
-                    left: formatOffset(signal.midpoint.x),
-                  }}
-                  animate={{ opacity: [0.2, 0.9, 0.2] }}
-                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: signal.index * 0.4 }}
-                >
-                  <div className="relative h-full w-full">
-                    <span className="absolute inset-0 block bg-gradient-to-r from-cyan-400/0 via-cyan-300/70 to-cyan-400/0" />
-                    <motion.span
-                      className="absolute left-0 top-1/2 h-1 w-1 -translate-y-1/2 rounded-full bg-cyan-200 shadow-[0_0_18px_rgba(165,243,252,0.65)]"
-                      animate={{ left: ["0%", "100%"] }}
-                      transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut", delay: signal.index * 0.6 }}
-                    />
-                  </div>
-                </motion.div>
-              ))}
-              {pairs.map(({ avatar, position }, index) => (
-                <motion.div
-                  key={avatar.name}
-                  className="absolute flex w-24 -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-2 text-center"
-                  style={{ left: formatOffset(position.x), top: formatOffset(position.y) }}
-                  animate={{ y: [0, -8, 0] }}
-                  transition={{ duration: 4 + index, repeat: Infinity, ease: "easeInOut" }}
-                >
-                  <div className="relative">
-                    <div className={`absolute -inset-2.5 rounded-full bg-gradient-to-br ${avatar.accent} blur-2xl opacity-70`} />
-                    <img
-                      src={avatar.image}
-                      alt={avatar.name}
-                      className="relative h-20 w-20 rounded-full border-2 border-white/20 object-cover"
-                    />
-                    <motion.span
-                      className="absolute inset-[-14px] rounded-full border border-cyan-300/0"
-                      animate={{ opacity: [0.1, 0.5, 0.1], scale: [1, 1.08, 1] }}
-                      transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: index * 0.3 }}
-                      style={{ boxShadow: "0 0 18px rgba(165, 243, 252, 0.35)" }}
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <span className="text-sm font-semibold text-white">{avatar.name}</span>
-                    <span className="text-[11px] uppercase tracking-[0.2em] text-white/50">
-                      {avatar.vibe}
-                    </span>
-                    <span className="text-xs text-white/60">{avatar.description}</span>
-                  </div>
-                </motion.div>
-              ))}
-            </motion.div>
+            <div
+              className="pointer-events-none absolute rounded-full border border-dashed border-white/10"
+              style={{ inset: orbitConfig.ringThickness * 1.4 }}
+            />
+            <div className="relative h-full w-full rounded-full overflow-hidden">
+              <div className="absolute inset-0 rounded-full bg-slate-950/70" />
+              <div
+                className="absolute inset-0 rounded-full border border-white/20"
+                style={{ borderWidth: orbitConfig.ringThickness }}
+              />
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 26, repeat: Infinity, ease: "linear" }}
+                className="absolute inset-0 z-10"
+              >
+                <div className="relative h-full w-full">
+                  {signalBridges.map((signal) => (
+                    <motion.div
+                      key={signal.index}
+                      className="pointer-events-none absolute h-px origin-center overflow-visible"
+                      style={{
+                        width: signal.length,
+                        transform: `translate(-50%, -50%) rotate(${signal.angle}deg)`,
+                        top: signal.midpoint.y,
+                        left: signal.midpoint.x,
+                      }}
+                      animate={{ opacity: [0.2, 0.9, 0.2] }}
+                      transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: signal.index * 0.4 }}
+                    >
+                      <div className="relative h-full w-full">
+                        <span className="absolute inset-0 block bg-gradient-to-r from-cyan-400/0 via-cyan-300/70 to-cyan-400/0" />
+                        <motion.span
+                          className="absolute left-0 top-1/2 h-1 w-1 -translate-y-1/2 rounded-full bg-cyan-200 shadow-[0_0_18px_rgba(165,243,252,0.65)]"
+                          animate={{ left: ["0%", "100%"] }}
+                          transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut", delay: signal.index * 0.6 }}
+                        />
+                      </div>
+                    </motion.div>
+                  ))}
+                  {positionedItems.map(({ avatar, position }, index) => (
+                    <motion.div
+                      key={avatar.name}
+                      className="absolute z-20 -translate-x-1/2 -translate-y-1/2"
+                      style={{
+                        left: position.x,
+                        top: position.y,
+                        width: orbitConfig.itemSize,
+                        height: orbitConfig.itemSize,
+                      }}
+                      animate={{ y: [0, -8, 0] }}
+                      transition={{ duration: 4 + index, repeat: Infinity, ease: "easeInOut" }}
+                    >
+                      <div className="relative flex h-full w-full flex-col items-center justify-center gap-3 overflow-hidden rounded-full border border-white/10 bg-slate-900/70 px-5 text-center text-white/80 backdrop-blur">
+                        <div className={`absolute -inset-4 rounded-full bg-gradient-to-br ${avatar.accent} blur-3xl opacity-60`} />
+                        <div className="relative z-10 flex flex-col items-center gap-3">
+                          <div className="relative">
+                            <img
+                              src={avatar.image}
+                              alt={avatar.name}
+                              className="rounded-full border-2 border-white/20 object-cover"
+                              style={{ width: avatarDiameter, height: avatarDiameter }}
+                            />
+                            <motion.span
+                              className="absolute inset-[-12px] rounded-full border border-cyan-300/0"
+                              animate={{ opacity: [0.1, 0.5, 0.1], scale: [1, 1.08, 1] }}
+                              transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: index * 0.3 }}
+                              style={{ boxShadow: "0 0 18px rgba(165, 243, 252, 0.35)" }}
+                            />
+                          </div>
+                          <div className="flex flex-col gap-1 leading-tight">
+                            <span className="text-xs font-semibold text-white">{avatar.name}</span>
+                            <span className="text-[10px] uppercase tracking-[0.25em] text-white/50">
+                              {avatar.vibe}
+                            </span>
+                            <span className="text-[11px] text-white/60">{avatar.description}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
+            </div>
           </motion.div>
           <div className="glass-panel mt-10 flex w-56 flex-col items-center gap-2 p-5 text-center">
             <span className="gradient-text text-xs uppercase tracking-[0.35em]">Orbit Sync</span>
