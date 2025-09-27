@@ -7,8 +7,9 @@ const avatars = [
     description: "Astro-Artist",
     image:
       "https://images.unsplash.com/photo-1544723795-3fb6469f5b39?auto=format&fit=crop&w=256&q=80",
-    vibe: "Mondlicht", 
-    accent: "from-primary/60 via-primary/30 to-transparent",
+    vibe: "Mondlicht",
+    accent:
+      "from-[rgba(244,114,182,0.55)] via-[rgba(244,114,182,0.22)] to-transparent",
   },
   {
     name: "Amir",
@@ -16,7 +17,8 @@ const avatars = [
     image:
       "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=256&q=80",
     vibe: "Deep House",
-    accent: "from-secondary/60 via-secondary/20 to-transparent",
+    accent:
+      "from-[rgba(99,102,241,0.5)] via-[rgba(99,102,241,0.18)] to-transparent",
   },
   {
     name: "Nia",
@@ -24,7 +26,8 @@ const avatars = [
     image:
       "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=256&q=80",
     vibe: "Cinematisch",
-    accent: "from-accent-500/70 via-accent-500/20 to-transparent",
+    accent:
+      "from-[rgba(56,189,248,0.55)] via-[rgba(56,189,248,0.2)] to-transparent",
   },
   {
     name: "Jasper",
@@ -32,7 +35,8 @@ const avatars = [
     image:
       "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=256&q=80",
     vibe: "Glow Rush",
-    accent: "from-secondary/50 via-primary/30 to-transparent",
+    accent:
+      "from-[rgba(129,140,248,0.45)] via-[rgba(244,114,182,0.25)] to-transparent",
   },
   {
     name: "Tara",
@@ -40,7 +44,8 @@ const avatars = [
     image:
       "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=256&q=80",
     vibe: "Sunset Muse",
-    accent: "from-primary/60 via-secondary/20 to-transparent",
+    accent:
+      "from-[rgba(244,114,182,0.55)] via-[rgba(99,102,241,0.2)] to-transparent",
   },
 ];
 
