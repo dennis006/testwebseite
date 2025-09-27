@@ -51,16 +51,19 @@ const avatars = [
 
 export function AvatarOrbitSection() {
   const pairs = useMemo(() => {
-    const orbitRadius = 110;
+    const baseRadius = 140;
+    const angleStep = (Math.PI * 2) / avatars.length;
 
     return avatars.map((avatar, index) => {
-      const angle = (index / avatars.length) * Math.PI * 2 - Math.PI / 2;
+      const angleVariation = Math.sin(index * 1.2) * (angleStep / 3.2);
+      const angle = -Math.PI / 2 + index * angleStep + angleVariation;
+      const radius = baseRadius + Math.cos(index * 1.6) * 32;
 
       return {
         avatar,
         position: {
-          x: Math.cos(angle) * orbitRadius,
-          y: Math.sin(angle) * orbitRadius,
+          x: Math.cos(angle) * radius,
+          y: Math.sin(angle) * radius,
         },
       };
     });
