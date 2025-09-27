@@ -51,7 +51,7 @@ const avatars = [
 
 export function AvatarOrbitSection() {
   const pairs = useMemo(() => {
-    const orbitRadius = 120;
+    const orbitRadius = 110;
 
     return avatars.map((avatar, index) => {
       const angle = (index / avatars.length) * Math.PI * 2 - Math.PI / 2;
@@ -131,20 +131,20 @@ export function AvatarOrbitSection() {
               {pairs.map(({ avatar, position }, index) => (
                 <motion.div
                   key={avatar.name}
-                  className="absolute flex w-28 -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-2 text-center"
+                  className="absolute flex w-24 -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-2 text-center"
                   style={{ left: `calc(50% + ${position.x}px)`, top: `calc(50% + ${position.y}px)` }}
                   animate={{ y: [0, -8, 0] }}
                   transition={{ duration: 4 + index, repeat: Infinity, ease: "easeInOut" }}
                 >
                   <div className="relative">
-                    <div className={`absolute -inset-3 rounded-full bg-gradient-to-br ${avatar.accent} blur-2xl opacity-70`} />
+                    <div className={`absolute -inset-2.5 rounded-full bg-gradient-to-br ${avatar.accent} blur-2xl opacity-70`} />
                     <img
                       src={avatar.image}
                       alt={avatar.name}
-                      className="relative h-24 w-24 rounded-full border-2 border-white/20 object-cover"
+                      className="relative h-20 w-20 rounded-full border-2 border-white/20 object-cover"
                     />
                     <motion.span
-                      className="absolute inset-[-18px] rounded-full border border-cyan-300/0"
+                      className="absolute inset-[-14px] rounded-full border border-cyan-300/0"
                       animate={{ opacity: [0.1, 0.5, 0.1], scale: [1, 1.08, 1] }}
                       transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: index * 0.3 }}
                       style={{ boxShadow: "0 0 18px rgba(165, 243, 252, 0.35)" }}
