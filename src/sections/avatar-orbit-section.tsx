@@ -51,7 +51,7 @@ const avatars = [
 
 export function AvatarOrbitSection() {
   const pairs = useMemo(() => {
-    const orbitRadius = 140;
+    const orbitRadius = 120;
 
     return avatars.map((avatar, index) => {
       const angle = (index / avatars.length) * Math.PI * 2 - Math.PI / 2;
@@ -66,6 +66,28 @@ export function AvatarOrbitSection() {
     });
   }, []);
 
+  const signalBridges = useMemo(() => {
+    return pairs.map((current, index) => {
+      const next = pairs[(index + 1) % pairs.length];
+
+      const dx = next.position.x - current.position.x;
+      const dy = next.position.y - current.position.y;
+      const length = Math.sqrt(dx * dx + dy * dy);
+      const angle = (Math.atan2(dy, dx) * 180) / Math.PI;
+      const midpoint = {
+        x: (current.position.x + next.position.x) / 2,
+        y: (current.position.y + next.position.y) / 2,
+      };
+
+      return {
+        index,
+        angle,
+        length,
+        midpoint,
+      };
+    });
+  }, [pairs]);
+
   return (
     <section className="section-padding">
       <div className="container grid items-center gap-16 lg:grid-cols-[1.1fr_0.9fr]">
@@ -75,7 +97,7 @@ export function AvatarOrbitSection() {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true, amount: 0.4 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="relative flex h-[420px] w-[420px] items-center justify-center overflow-hidden rounded-full border border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-950/60 to-slate-950/90 shadow-[0_0_80px_rgba(14,165,233,0.35)]"
+            className="relative flex h-[440px] w-[440px] items-center justify-center overflow-visible rounded-full border border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-950/60 to-slate-950/90 shadow-[0_0_80px_rgba(14,165,233,0.35)]"
           >
             <div className="absolute inset-12 rounded-full border border-dashed border-white/10" />
             <motion.div
@@ -83,6 +105,29 @@ export function AvatarOrbitSection() {
               transition={{ duration: 26, repeat: Infinity, ease: "linear" }}
               className="absolute inset-6"
             >
+              {signalBridges.map((signal) => (
+                <motion.div
+                  key={signal.index}
+                  className="absolute left-1/2 top-1/2 h-px origin-center overflow-visible"
+                  style={{
+                    width: signal.length,
+                    transform: `translate(-50%, -50%) rotate(${signal.angle}deg)`,
+                    top: `calc(50% + ${signal.midpoint.y}px)`,
+                    left: `calc(50% + ${signal.midpoint.x}px)`,
+                  }}
+                  animate={{ opacity: [0.2, 0.9, 0.2] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: signal.index * 0.4 }}
+                >
+                  <div className="relative h-full w-full">
+                    <span className="absolute inset-0 block bg-gradient-to-r from-cyan-400/0 via-cyan-300/70 to-cyan-400/0" />
+                    <motion.span
+                      className="absolute left-0 top-1/2 h-1 w-1 -translate-y-1/2 rounded-full bg-cyan-200 shadow-[0_0_18px_rgba(165,243,252,0.65)]"
+                      animate={{ left: ["0%", "100%"] }}
+                      transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut", delay: signal.index * 0.6 }}
+                    />
+                  </div>
+                </motion.div>
+              ))}
               {pairs.map(({ avatar, position }, index) => (
                 <motion.div
                   key={avatar.name}
@@ -92,13 +137,17 @@ export function AvatarOrbitSection() {
                   transition={{ duration: 4 + index, repeat: Infinity, ease: "easeInOut" }}
                 >
                   <div className="relative">
-                    <div
-                      className={`absolute -inset-3 rounded-full bg-gradient-to-br ${avatar.accent} blur-2xl opacity-70`}
-                    />
+                    <div className={`absolute -inset-3 rounded-full bg-gradient-to-br ${avatar.accent} blur-2xl opacity-70`} />
                     <img
                       src={avatar.image}
                       alt={avatar.name}
                       className="relative h-24 w-24 rounded-full border-2 border-white/20 object-cover"
+                    />
+                    <motion.span
+                      className="absolute inset-[-18px] rounded-full border border-cyan-300/0"
+                      animate={{ opacity: [0.1, 0.5, 0.1], scale: [1, 1.08, 1] }}
+                      transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: index * 0.3 }}
+                      style={{ boxShadow: "0 0 18px rgba(165, 243, 252, 0.35)" }}
                     />
                   </div>
                   <div className="flex flex-col gap-1">
@@ -117,6 +166,11 @@ export function AvatarOrbitSection() {
             <p className="text-xs text-white/80">
               Pulse liest Mikrosignale, wenn eure Avatare kollidieren – so fühlt sich Matching organisch an.
             </p>
+            <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.25em] text-cyan-200/80">
+              <span className="h-1 w-1 rounded-full bg-cyan-200 shadow-[0_0_12px_rgba(165,243,252,0.8)]" />
+              Live Signals
+              <span className="h-1 w-1 rounded-full bg-cyan-200 shadow-[0_0_12px_rgba(165,243,252,0.8)]" />
+            </div>
           </div>
         </div>
 
