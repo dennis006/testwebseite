@@ -66,6 +66,9 @@ export function AvatarOrbitSection() {
     });
   }, []);
 
+  const formatOffset = (value: number) =>
+    value >= 0 ? `calc(50% + ${value}px)` : `calc(50% - ${Math.abs(value)}px)`;
+
   const signalBridges = useMemo(() => {
     return pairs.map((current, index) => {
       const next = pairs[(index + 1) % pairs.length];
@@ -112,8 +115,8 @@ export function AvatarOrbitSection() {
                   style={{
                     width: signal.length,
                     transform: `translate(-50%, -50%) rotate(${signal.angle}deg)`,
-                    top: `calc(50% + ${signal.midpoint.y}px)`,
-                    left: `calc(50% + ${signal.midpoint.x}px)`,
+                    top: formatOffset(signal.midpoint.y),
+                    left: formatOffset(signal.midpoint.x),
                   }}
                   animate={{ opacity: [0.2, 0.9, 0.2] }}
                   transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: signal.index * 0.4 }}
@@ -132,7 +135,7 @@ export function AvatarOrbitSection() {
                 <motion.div
                   key={avatar.name}
                   className="absolute flex w-24 -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-2 text-center"
-                  style={{ left: `calc(50% + ${position.x}px)`, top: `calc(50% + ${position.y}px)` }}
+                  style={{ left: formatOffset(position.x), top: formatOffset(position.y) }}
                   animate={{ y: [0, -8, 0] }}
                   transition={{ duration: 4 + index, repeat: Infinity, ease: "easeInOut" }}
                 >
