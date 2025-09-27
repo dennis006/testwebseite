@@ -45,11 +45,11 @@ const avatars = [
 ];
 
 const orbitPositions = [
-  { x: 0, y: -140 },
-  { x: 120, y: -40 },
-  { x: 90, y: 120 },
-  { x: -120, y: -30 },
-  { x: -90, y: 120 },
+  { x: 0, y: -120 },
+  { x: 105, y: -25 },
+  { x: 85, y: 105 },
+  { x: -105, y: -20 },
+  { x: -85, y: 110 },
 ];
 
 export function AvatarOrbitSection() {
@@ -107,9 +107,9 @@ export function AvatarOrbitSection() {
                 </motion.div>
               ))}
             </motion.div>
-            <div className="glass-panel relative flex h-40 w-40 flex-col items-center justify-center gap-2 text-center">
+            <div className="glass-panel absolute bottom-10 left-1/2 flex w-48 -translate-x-1/2 flex-col items-center gap-2 p-5 text-center">
               <span className="gradient-text text-xs uppercase tracking-[0.35em]">Orbit Sync</span>
-              <p className="text-sm text-white/80">
+              <p className="text-xs text-white/80">
                 Pulse liest Mikrosignale, wenn eure Avatare kollidieren – so fühlt sich Matching organisch an.
               </p>
             </div>
@@ -131,7 +131,7 @@ export function AvatarOrbitSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.4 }}
             transition={{ delay: 0.05, duration: 0.6, ease: "easeOut" }}
-            className="font-display text-3xl leading-tight sm:text-4xl"
+            className="font-display text-3xl leading-snug sm:text-4xl lg:max-w-[28rem]"
           >
             Avatare, die sich bewegen wie du – reagierend auf Stimmung, Zeit und Ort.
           </motion.h2>
